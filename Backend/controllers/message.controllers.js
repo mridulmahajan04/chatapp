@@ -50,12 +50,12 @@ export const getMessage = async (req, res) => {
         }).populate("messages");
 
         if(!conversationReceive) {
-            res.status(201).json({error:"Not Any Messages"});
+            return res.status(201).json({error:"Not Any Messages"});
         }
         const messages = conversationReceive.messages;
         res.status(200).json(messages);
     } catch (error) {
-        console.log(error);
+        console.log(error.message);
         res.status(201).json({error:"Error is there"});
     }
 }
