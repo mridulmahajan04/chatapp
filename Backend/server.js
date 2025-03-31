@@ -10,9 +10,9 @@ import userRoutes from "./routes/user.routes.js"
 
 // Database Imports
 import connectToMongoDB from "./db/connectToMongoDB.js";
-
+import {app, server} from "./socket/socket.js"
 const PORT = process.env.PORT || 5000 //Either Port Value should be 5000 or it should be taken from dotenv file
-const app = express();
+// const app = express();
 
 app.use(express.json()); // Add this to parse JSON request bodies
 app.use(cookieParser());
@@ -23,7 +23,7 @@ app.use('/api/auth', appRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/users', userRoutes);
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     connectToMongoDB();
     console.log(`Server is running on ${PORT}`)
 });

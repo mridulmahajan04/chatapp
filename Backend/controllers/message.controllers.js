@@ -1,6 +1,7 @@
 import express from "express";
 import conversation from "../models/conversation.model.js";
 import Message from "../models/message.model.js";
+import { getReceiverSocketId, io } from "../socket/socket.js";
 export const sendMessage = async (req, res) => {
     try {
         const { message } = req.body;
@@ -31,6 +32,11 @@ export const sendMessage = async (req, res) => {
 
         await conversations.save();
         await newMessage.save();
+        // Socket IO
+        const receiverSocketId = getReceiverSocketId(receiverId);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit("newMessage", newMessage)
+        }
         res.status(201).json(newMessage);
     } catch (error) {
         res.status(400).json({ error: "Internal Error is there" });
@@ -40,22 +46,22 @@ export const sendMessage = async (req, res) => {
 
 export const getMessage = async (req, res) => {
     try {
-        const {id: userToChatId} = req.params;
+        const { id: userToChatId } = req.params;
         const senderId = req.user._id;
 
         const conversationReceive = await conversation.findOne({
-            participants:{
+            participants: {
                 $all: [senderId, userToChatId]
             }
         }).populate("messages");
 
-        if(!conversationReceive) {
-            return res.status(201).json({error:"Not Any Messages"});
+        if (!conversationReceive) {
+            return res.status(201).json({ error: "Not Any Messages" });
         }
         const messages = conversationReceive.messages;
         res.status(200).json(messages);
     } catch (error) {
         console.log(error.message);
-        res.status(201).json({error:"Error is there"});
+        res.status(201).json({ error: "Error is there" });
     }
 }
